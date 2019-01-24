@@ -1,5 +1,30 @@
 
 var layersGroup = layersString.layers.layer;
+var attr = JSON.parse(JSON.stringify(attributesString));
+var attributsList = [];
+const excludeAttribute = ["gid", "osm_id", "osm_way_id", "ref_cog", "geom"];
+const operateurs = ["=", "<>", ">", ">=", "<", "<=", "LIKE", "IN"];
+
+//get All layers attributes
+attr.forEach(obj => {
+    attrs = [];
+    try{
+        obj.featureType.attributes.attribute.forEach(attribute => {
+            if(excludeAttribute.indexOf(attribute.name) == -1){
+                attrs.push(attribute.name);
+            }
+        });
+    }catch(e){
+        attrs.push(obj.featureType.name);
+    }
+//    alert(JSON.stringify(obj.featureType.attributes.attribute));
+//    obj.featureType.attributes.attribute.forEach(attribute => {
+//        if(excludeAttribute.indexOf(attribute.name) == -1){
+//            attrs.push(attribute.name);
+//        }
+//    });
+    attributsList.push(attrs);
+});
 
 window.onload = function () {
     var x = document.getElementsByClassName("ol-has-tooltip");
@@ -29,7 +54,9 @@ layers = layersGroup.map(layer => {
 });
 
 var listLayershtml = "";
+var listLayersOptions = "";
 layersGroup.forEach((layer, i) => {
+
     const html = '' +
             '<div>' +
             '<label for="' + layer.name + '">' +
@@ -37,9 +64,14 @@ layersGroup.forEach((layer, i) => {
             '<span>' + layer.name + '</span>' +
             '</label>' +
             '</div>';
+
+    const option = '<option value="' + layer.name + '">' + layer.name + '</option>';
+
+    listLayersOptions += option;
     listLayershtml += html;
 });
 $("#list-couche").html(listLayershtml);
+$("#listCoucheSel").html(listLayersOptions);
 
 var view = new ol.View({
     center: ol.proj.transform([12.3446, 7.3696], 'EPSG:4326', 'EPSG:3857'),
@@ -68,14 +100,25 @@ controls.forEach(function (el) {
 });
 map.removeControl(attributionControl);
 
+var layerIndex = -1;
+$("#listCoucheSel").change(function () {
+    let select = $("#listCoucheSel").prop('selectedIndex');
+    let selectAttrs = attributsList[select];
+    let attrSelect = "";
+    selectAttrs.forEach(att =>{
+       const option = '<option value="' + att + '">' + att + '</option>';
+       attrSelect+=option;
+    });
+    $("#listAttributSel").html(attrSelect);
+    layerIndex = select;
+});
+
 $("#updateFilter").click(function () {
     updateFilter();
 });
 
 $("#resetFilter").click(function () {
-    $("#attrSelect").prop("selectedIndex", 0);
-    $("#opSelect").prop("selectedIndex", 0);
-    $("#value").val("");
+    $("#cqlFilter").val("");
     updateFilter('reset');
 });
 
@@ -85,22 +128,21 @@ function updateFilter(type) {
     }
 
     if (type == 'reset') {
-        map.getLayers().forEach(layer => {
-            layer.getSource().updateParams(cql_filter);
-            layer.getSource().refresh();
+        map.getLayers().forEach((layer, i) => {
+            if(i == layerIndex){
+                layer.getSource().updateParams(cql_filter);
+                layer.getSource().refresh();
+            }
         });
     } else {
-        var attribut = $("#attrSelect").val();
-        var operateur = $("#opSelect").val();
-        var value = $("#value").val();
-
-        // display value property of select list (from selected option)
-        //alert(attribut + '' + operateur + '' + value);
-        cql_filter.cql_filter = attribut + '' + operateur + '' + value;
-//        alert(JSON.stringify(cql_filter));
-        map.getLayers().forEach(layer => {
-            layer.getSource().updateParams(cql_filter);
-        });
+        if($("#cqlFilter").val()){
+            cql_filter.cql_filter = $("#cqlFilter").val(); 
+            map.getLayers().forEach((layer, i) => {
+                if(i == layerIndex){
+                    layer.getSource().updateParams(cql_filter);
+                }
+            });
+        }
     }
 
 

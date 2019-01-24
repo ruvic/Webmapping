@@ -19,17 +19,11 @@
                         </form>
                     </div>
                     <div>
-                        <select id="attrSelect" name="attrSelect">
-                            <option value="name">name</option>
-                            <option value="saab">Saab</option>
-                            <option value="mercedes">Mercedes</option>
+                        <select id="listCoucheSel" name="listCoucheSel">
+                        </select><br>
+                        <select id="listAttributSel" name="listAttributSel">
                         </select>
-                        <select id="opSelect" name="opSelect">
-                            <option value="=">=</option>
-                            <option value="saab">Saab</option>
-                            <option value="mercedes">Mercedes</option>
-                        </select>
-                        <input type="text" name="value" id="value"/>
+                        <input type="text" name="cqlFilter" id="cqlFilter"/>
                         <button type="button" id="updateFilter">Update</button>
                         <button type="button" id="resetFilter">Reset</button>
                     </div>
@@ -40,6 +34,7 @@
     </body>
     <script>
         let layersString = ${layers};
+        let attributesString = ${attributes};
     </script>
     <script src="assets/ol3/js/ol-debug.js"></script>
     <script src="assets/js/jquery.min.js"></script>

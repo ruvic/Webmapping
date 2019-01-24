@@ -5,13 +5,20 @@
  */
 package com.webmapping.servlets;
 
+import com.google.gson.Gson;
+import com.webmapping.utils.CardData;
+import com.webmapping.utils.LayerItem;
+import com.webmapping.utils.Layers;
 import com.webmapping.utils.ParameterStringBuilder;
 import com.webmapping.utils.Requester;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -25,6 +32,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -44,9 +52,12 @@ import org.apache.commons.codec.binary.Base64;
  * @author ruvic
  */
 
-@MultipartConfig(fileSizeThreshold = 1024 * 1024 * 10, maxFileSize = 1024 * 1024 * 30, maxRequestSize = 1024 * 1024 * 50)
+@MultipartConfig()
 public class MainController extends HttpServlet {
-
+    
+    public static final int TAILLE_TAMPON = 10240;
+    public static String CHEMIN_FICHIERS=""; 
+    
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -84,11 +95,26 @@ public class MainController extends HttpServlet {
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws ServletException, IOException {        
+        CardData card = getCardData();
+        request.setAttribute("layers", card.layers);
+        request.setAttribute("attributes", card.attributes);
+        this.getServletContext().getRequestDispatcher("/WEB-INF/index.jsp").forward(request, response);
+    }
+    
+    public CardData getCardData(){
+        String baseUrl = "http://localhost:8080/geoserver/rest/workspaces/cameroon/datastores/cameroon_map/featuretypes/";
         String url = "http://localhost:8080/geoserver/rest/workspaces/cameroon/layers";
         String result = Requester.requestGet(url);
-        request.setAttribute("layers", result);
-        this.getServletContext().getRequestDispatcher("/WEB-INF/index.jsp").forward(request, response);
+        
+        Layers obj = new Gson().fromJson(result, Layers.class);
+        ArrayList<String> attributesBase = new ArrayList<>();
+        for (LayerItem layerItem : obj.getLayers().getLayer()) {
+            String res = Requester.requestGet(baseUrl+layerItem.getName());
+            attributesBase.add(res);
+        }
+        
+        return new CardData(result, attributesBase);
     }
 
     /**
@@ -106,33 +132,51 @@ public class MainController extends HttpServlet {
         Part filePart = request.getPart("file"); // Retrieves <input type="file" name="file">
         Path filePath = Paths.get(filePart.getSubmittedFileName());
         String filename = filePath.getFileName().toString();
+        CHEMIN_FICHIERS = this.getServletContext().getRealPath("/WEB-INF/shapefiles/")+'/';
         
-        String shapefilesPath = this.getServletContext().getRealPath("/WEB-INF/shapefiles/");
-        File uploads = new File(shapefilesPath);
-        
-        File file = new File(uploads, filename);
-        try (InputStream input = filePart.getInputStream()) {
-            Files.copy(input, file.toPath());
+        if (filename != null && !filename.isEmpty()) { // Si on a bien un fichier
+            String nomChamp = filePart.getName();
+            // Corrige un bug du fonctionnement d'Internet Explorer
+             filename = filename.substring(filename.lastIndexOf('/') + 1)
+                    .substring(filename.lastIndexOf('\\') + 1);
+            writeFile(filePart, filename, CHEMIN_FICHIERS);  // On écrit définitivement le fichier sur le disque
         }
         
+        String body = "file:///" + CHEMIN_FICHIERS + filename;
         String url = "http://localhost:8080/geoserver/rest/workspaces/cameroon/datastores/cameroon_map/external.shp";
+        Requester.requestPost(url, body);
         
-        System.out.println("*******************************");
-        System.out.println(file.getAbsolutePath());
-        System.out.println("*******************************");
+        CardData card = getCardData();
+        request.setAttribute("layers", card.layers);
+        request.setAttribute("attributes", card.attributes);
         
+        this.getServletContext().getRequestDispatcher("/WEB-INF/index.jsp").forward(request, response);
         
-        
-        String result = Requester.requestPost(url, file);
-        
-        System.out.println("---------------------------------------");
-        System.out.println(result);
-        System.out.println("---------------------------------------");
-        
-        
-        file.delete();
     }
     
+    private void writeFile( Part part, String nomFichier, String chemin ) throws IOException {
+        BufferedInputStream entree = null;
+        BufferedOutputStream sortie = null;
+        try {
+            entree = new BufferedInputStream(part.getInputStream(), TAILLE_TAMPON);
+            sortie = new BufferedOutputStream(new FileOutputStream(new File(chemin + nomFichier)), TAILLE_TAMPON);
+
+            byte[] tampon = new byte[TAILLE_TAMPON];
+            int longueur;
+            while ((longueur = entree.read(tampon)) > 0) {
+                sortie.write(tampon, 0, longueur);
+            }
+        } finally {
+            try {
+                sortie.close();
+            } catch (IOException ignore) {
+            }
+            try {
+                entree.close();
+            } catch (IOException ignore) {
+            }
+        }
+    }
    
     /**
      * Returns a short description of the servlet.
