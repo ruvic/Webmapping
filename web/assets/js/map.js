@@ -1,115 +1,109 @@
-$(function(){
-    const format = "image/png";
 
-  const layersGroup = obj.layerGroup.publishables.published;
-  let layers;
-  layers = layersGroup.map(layer => {
-    const layerTile = new ol.layer.Tile({
-      name: layer.name.slice(-19),
-      source: new ol.source.TileWMS({
-        ratio: 1,
-        url: "http://localhost:8080/geoserver/cameroon/wms",
-        params: {
-          FORMAT: format,
-          VERSION: "1.1.1",
-          TILED: true,
-          LAYERS: layer.name,
-        //   exceptions: "application/vnd.ogc.se_inimage",
-        //   tilesOrigin: 8.38221740722656 + "," + 1.65466582775116
-        },
-        serverType: "geoserver"
-      })
-    });
-    return layerTile;
-  });
+var layersGroup = layersString.layers.layer;
 
-  const layerGroup = new ol.layer.Group({
-    layers: layers,
-    name: "cameroun"
-  });
+window.onload = function () {
+    var x = document.getElementsByClassName("ol-has-tooltip");
+    x[x.length - 1].click();
+}
 
-  const projection = new ol.proj.Projection({
-    code: "EPSG:4326"
-  });
-
-  const map = new ol.Map({
-    target: "map",
-    layers: [layerGroup],
-    view: new ol.View({
-      //projection: projection,
-      center: ol.proj.fromLonLat([12.3446, 7.3696]),
-      zoom: 6.4
-    }),
-    controls: ol.control.defaults().extend([
-      //new ol.control.Attribution(),
-      new ol.control.ScaleLine({
-        units: "degrees",
-        minwidth: 100
-      }),
-      new ol.control.MousePosition({
-        coordinateFormat: function(coordinates) {
-          const coord_x = coordinates[0].toFixed(3);
-          const coord_y = coordinates[1].toFixed(3);
-          return coord_x + ", " + coord_y;
-        },
-        target: "coordinates"
-      }),
-      new ol.control.ZoomSlider(),
-      new ol.control.OverviewMap({
-        collapsible: false
-      }),
-      new ol.control.FullScreen()
-    ]),
-    interactions: ol.interaction
-      .defaults({
-        shiftDragZoom: true
-      })
-      .extend([
-        new ol.interaction.Select({
-          layers: [layerGroup]
-        }),
-        new ol.interaction.DragRotateAndZoom()
-      ])
-  });
-
-  map.on("singleclick", function(evt) {    
-    var view = map.getView();
-    var viewResolution = view.getResolution();    
-    
-    layers.map(layer => {
-      var url = layer
-        .getSource()
-        .getGetFeatureInfoUrl(
-          evt.coordinate,
-          viewResolution,
-          view.getProjection(),
-          {
-            INFO_FORMAT: "text/html",
-            FEATURE_COUNT: 50
-          }
-        );
-      if (url) {
-        console.log(url);
-        document.getElementById("info").innerHTML +=
-          '<iframe seamless src="' + url + '"></iframe>';
-      }
-    });
-  });
-
-  const layerList = $("#list-couche");  
-  map.getLayers().forEach(layer => {
-    layer.getLayers().forEach((sublayer, j) => {
-      const layerId = "layer" + j;
-      const content = `<li class="list-group-item no-padding-l-r">
-      <div class="checkbox checkbox-square checkbox-primary checkbox-lg">
-        <input id="${layerId}" type="checkbox" checked=${sublayer.getVisible()}>
-        <label for="${layerId}" style="font-size: medium">${sublayer.get(
-        "name"
-      )}</label>
-      </div>
-    </li>`;
-      layerList.append(content);
-      bindInputs(layerId, sublayer);
-    });
-  });
+var zoomToExtentControl = new ol.control.ZoomToExtent({
+    extent: [
+        8.46020030975342, 1.59752249717712,
+        16.2306156158447, 13.1404762268066
+    ]
 });
+
+var layers;
+layers = layersGroup.map(layer => {
+    return new ol.layer.Tile({
+        opacity: 1.0,
+        source: new ol.source.TileWMS({
+            url: 'http://localhost:8080/geoserver/cameroon/wms',
+            params: {
+                LAYERS: 'cameroon:' + layer.name,
+                TILED: true,
+            },
+            serverType: 'geoserver'
+        })
+    });
+});
+
+var listLayershtml = "";
+layersGroup.forEach((layer, i) => {
+    const html = '' +
+            '<div>' +
+            '<label for="' + layer.name + '">' +
+            '<input type="checkbox" id="' + layer.name + '" name="' + layer.name + '"/>' +
+            '<span>' + layer.name + '</span>' +
+            '</label>' +
+            '</div>';
+    listLayershtml += html;
+});
+$("#list-couche").html(listLayershtml);
+
+var view = new ol.View({
+    center: ol.proj.transform([12.3446, 7.3696], 'EPSG:4326', 'EPSG:3857'),
+});
+
+var map = new ol.Map({
+    layers: layers,
+    logo: false,
+    target: 'map',
+    view: view,
+});
+
+// Loop from the end to get the top layer in first
+for (var i = 0; i < layers.length; i++) {
+    var visible = new ol.dom.Input(document.getElementById(layersGroup[i].name));
+    visible.bindTo('checked', layers[i], 'visible');
+}
+
+map.addControl(zoomToExtentControl);
+var controls = map.getControls();
+var attributionControl;
+controls.forEach(function (el) {
+    if (el instanceof ol.control.Attribution) {
+        attributionControl = el;
+    }
+});
+map.removeControl(attributionControl);
+
+$("#updateFilter").click(function () {
+    updateFilter();
+});
+
+$("#resetFilter").click(function () {
+    $("#attrSelect").prop("selectedIndex", 0);
+    $("#opSelect").prop("selectedIndex", 0);
+    $("#value").val("");
+    updateFilter('reset');
+});
+
+function updateFilter(type) {
+    var cql_filter = {
+        'cql_filter': null
+    }
+
+    if (type == 'reset') {
+        map.getLayers().forEach(layer => {
+            layer.getSource().updateParams(cql_filter);
+            layer.getSource().refresh();
+        });
+    } else {
+        var attribut = $("#attrSelect").val();
+        var operateur = $("#opSelect").val();
+        var value = $("#value").val();
+
+        // display value property of select list (from selected option)
+        //alert(attribut + '' + operateur + '' + value);
+        cql_filter.cql_filter = attribut + '' + operateur + '' + value;
+//        alert(JSON.stringify(cql_filter));
+        map.getLayers().forEach(layer => {
+            layer.getSource().updateParams(cql_filter);
+        });
+    }
+
+
+
+}
+

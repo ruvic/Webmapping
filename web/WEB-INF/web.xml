@@ -6,7 +6,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>MainController</servlet-name>
-        <url-pattern>/cameroon_map</url-pattern>
+        <url-pattern>/map</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>
