@@ -3,26 +3,20 @@ var layersGroup = layersString.layers.layer;
 var attr = JSON.parse(JSON.stringify(attributesString));
 var attributsList = [];
 const excludeAttribute = ["gid", "osm_id", "osm_way_id", "ref_cog", "geom"];
-const operateurs = ["=", "<>", ">", ">=", "<", "<=", "LIKE", "IN"];
 
 //get All layers attributes
 attr.forEach(obj => {
     attrs = [];
-    try{
+    try {
         obj.featureType.attributes.attribute.forEach(attribute => {
-            if(excludeAttribute.indexOf(attribute.name) == -1){
+            if (excludeAttribute.indexOf(attribute.name) == -1) {
                 attrs.push(attribute.name);
             }
         });
-    }catch(e){
+    } catch (e) {
         attrs.push(obj.featureType.name);
     }
-//    alert(JSON.stringify(obj.featureType.attributes.attribute));
-//    obj.featureType.attributes.attribute.forEach(attribute => {
-//        if(excludeAttribute.indexOf(attribute.name) == -1){
-//            attrs.push(attribute.name);
-//        }
-//    });
+
     attributsList.push(attrs);
 });
 
@@ -52,25 +46,44 @@ layers = layersGroup.map(layer => {
         })
     });
 });
-
+let form;
+let couches_lay = document.getElementById("list-couche");
 var listLayershtml = "";
 var listLayersOptions = "";
 layersGroup.forEach((layer, i) => {
-
-    const html = '' +
-            '<div>' +
-            '<label for="' + layer.name + '">' +
-            '<input type="checkbox" id="' + layer.name + '" name="' + layer.name + '"/>' +
-            '<span>' + layer.name + '</span>' +
-            '</label>' +
-            '</div>';
-
+    
     const option = '<option value="' + layer.name + '">' + layer.name + '</option>';
-
     listLayersOptions += option;
-    listLayershtml += html;
+    
+    let c1 = document.createElement('div');
+    c1.setAttribute('class', 'col-md-3');
+    let c2 = document.createElement('label');
+    c2.setAttribute('class', 'switch');
+    let c3 = document.createElement('input');
+    c3.setAttribute('type', 'checkbox');
+    c3.setAttribute('id',layer.name);
+    c3.setAttribute('class', 'switch');
+    c3.setAttribute('value', '1');
+    c2.appendChild(c3);
+    c2.appendChild(document.createElement('span'));
+    c1.appendChild(c2);
+
+    form = document.createElement('div');
+    form.setAttribute('class', 'form-group');
+    form.appendChild(c1);
+    let a1 = document.createElement('div');
+    a1.setAttribute('class', 'col-md-9');
+    let nom = document.createElement('span');
+    //nom.setAttribute('class', 'help-block');
+    nom.innerHTML = layer.name;
+    a1.appendChild(nom);
+    form.appendChild(a1);
+    couches_lay.appendChild(form);
+    
+    
+    //listLayershtml += html;
 });
-$("#list-couche").html(listLayershtml);
+//$("#list-couche").html(listLayershtml);
 $("#listCoucheSel").html(listLayersOptions);
 
 var view = new ol.View({
@@ -99,15 +112,14 @@ controls.forEach(function (el) {
     }
 });
 map.removeControl(attributionControl);
-
 var layerIndex = -1;
 $("#listCoucheSel").change(function () {
     let select = $("#listCoucheSel").prop('selectedIndex');
     let selectAttrs = attributsList[select];
     let attrSelect = "";
-    selectAttrs.forEach(att =>{
-       const option = '<option value="' + att + '">' + att + '</option>';
-       attrSelect+=option;
+    selectAttrs.forEach(att => {
+        const option = '<a href="#" class="list-group-item">' + att + '</a>';
+        attrSelect += option;
     });
     $("#listAttributSel").html(attrSelect);
     layerIndex = select;
@@ -129,20 +141,22 @@ function updateFilter(type) {
 
     if (type == 'reset') {
         map.getLayers().forEach((layer, i) => {
-            if(i == layerIndex){
+            if (i == layerIndex) {
                 layer.getSource().updateParams(cql_filter);
-                layer.getSource().refresh();
             }
         });
     } else {
-        if($("#cqlFilter").val()){
-            cql_filter.cql_filter = $("#cqlFilter").val(); 
+        
+        if ($("#cqlFilter").val()) {
+            
+            cql_filter.cql_filter = $("#cqlFilter").val();
             map.getLayers().forEach((layer, i) => {
-                if(i == layerIndex){
+                if (i == layerIndex) {
                     layer.getSource().updateParams(cql_filter);
                 }
             });
         }
+        
     }
 
 

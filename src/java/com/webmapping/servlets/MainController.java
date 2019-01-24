@@ -99,7 +99,7 @@ public class MainController extends HttpServlet {
         CardData card = getCardData();
         request.setAttribute("layers", card.layers);
         request.setAttribute("attributes", card.attributes);
-        this.getServletContext().getRequestDispatcher("/WEB-INF/index.jsp").forward(request, response);
+        this.getServletContext().getRequestDispatcher("/index1.jsp").forward(request, response);
     }
     
     public CardData getCardData(){
@@ -150,7 +150,7 @@ public class MainController extends HttpServlet {
         request.setAttribute("layers", card.layers);
         request.setAttribute("attributes", card.attributes);
         
-        this.getServletContext().getRequestDispatcher("/WEB-INF/index.jsp").forward(request, response);
+        this.getServletContext().getRequestDispatcher("/index1.jsp").forward(request, response);
         
     }
     
