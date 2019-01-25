@@ -136,6 +136,7 @@ public class MainController extends HttpServlet {
         
         if (filename != null && !filename.isEmpty()) { // Si on a bien un fichier
             String nomChamp = filePart.getName();
+            System.out.println("Dans la methode");
             // Corrige un bug du fonctionnement d'Internet Explorer
              filename = filename.substring(filename.lastIndexOf('/') + 1)
                     .substring(filename.lastIndexOf('\\') + 1);
@@ -187,127 +188,5 @@ public class MainController extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
-    
-    
-//    private String streamToString(InputStream inputStream) throws IOException {
-//        String text = new Scanner(inputStream, "UTF-8").useDelimiter("\\Z").next();
-//        inputStream.close();
-//        return text;
-//    }
-    
-    
-//    public String requestGet(String urlQuery){
-//        URL url;
-//        InputStream in = null;
-//        try {
-//            url = new URL(urlQuery);
-//            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-//            String encoding = new String(new Base64().encode("admin:geoserver".getBytes()));
-//            con.setRequestProperty  ("Authorization", "Basic " + encoding);
-//            con.setRequestProperty("Content-Type", "application/json");
-//            con.setRequestProperty("Accept", "application/json");
-//            con.setRequestMethod("GET");
-//            con.connect();
-//            
-//            //get Result
-//            in = con.getInputStream();
-//            BufferedReader buffer = new BufferedReader(
-//                new InputStreamReader(in)
-//            );
-//            String inputLine;
-//            StringBuffer content = new StringBuffer();
-//            while ((inputLine = buffer.readLine()) != null) {
-//                content.append(inputLine);
-//            }
-//            
-//            return content.toString();
-//            
-//        } catch (Exception ex) {
-//            Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
-//            return null;
-//        }
-//        
-//    }
-    
-//    public String requestPost(String urlQuery, File file){
-//        URL url;
-//        try {
-//            
-//            url = new URL(urlQuery);
-//            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-//            String encoding = new String(new Base64().encode("admin:geoserver".getBytes()));
-//            con.setRequestProperty  ("Authorization", "Basic " + encoding);
-//            
-//            // Indicate that we want to write to the HTTP request body
-//            con.setDoOutput(true);
-//            con.setRequestMethod("PUT");
-//            con.addRequestProperty("Content-Type", "text/plain");
-//
-//            OutputStream outputStreamToRequestBody = con.getOutputStream();
-////            BufferedWriter httpRequestBodyWriter =
-////                new BufferedWriter(new OutputStreamWriter(outputStreamToRequestBody));
-////
-////            // Include value from the myFileDescription text area in the post data
-////            httpRequestBodyWriter.write("\n\n--" + boundaryString + "\n");
-////            httpRequestBodyWriter.write("Content-Disposition: form-data; name=\"shapefile\"");
-////            httpRequestBodyWriter.write("\n\n");
-////            httpRequestBodyWriter.write("Log file for 20150208");
-////
-////            // Include the section to describe the file
-////            httpRequestBodyWriter.write("\n--" + boundaryString + "\n");
-////            httpRequestBodyWriter.write("Content-Disposition: form-data;"
-////                    + "name=\""+file.getName()+"\";"
-////                    + "filename=\""+ file.getName() +"\""
-////                    + "\nContent-Type: text/plain\n\n");
-////            httpRequestBodyWriter.flush();
-//
-//            // Write the actual file contents
-//            FileInputStream inputStreamToLogFile = new FileInputStream(file);
-//
-//            int bytesRead;
-//            byte[] dataBuffer = new byte[1024];
-//            while((bytesRead = inputStreamToLogFile.read(dataBuffer)) != -1) {
-//                outputStreamToRequestBody.write(dataBuffer, 0, bytesRead);
-//            }
-//
-//            outputStreamToRequestBody.flush();
-//
-//            // Mark the end of the multipart http request
-////            httpRequestBodyWriter.write("\n--" + boundaryString + "--\n");
-////            httpRequestBodyWriter.flush();
-//
-//            // Close the streams
-//            outputStreamToRequestBody.close();
-////            httpRequestBodyWriter.close();
-//            
-////            con.connect();
-//            int status = con.getResponseCode();
-//            if(status == HttpURLConnection.HTTP_OK){
-//                //get Result
-//                InputStream in = con.getInputStream();
-//                BufferedReader buffer = new BufferedReader(
-//                    new InputStreamReader(in)
-//                );
-//                String inputLine;
-//                StringBuffer content = new StringBuffer();
-//                while ((inputLine = buffer.readLine()) != null) {
-//                    content.append(inputLine);
-//                }
-//
-//                System.out.println("********************************");
-//                System.out.println(content.toString());
-//                System.out.println("*********************************");
-//            }else{
-//                throw new IOException("Server returned non-OK status: " + status);
-//            }
-//            
-//            
-//        } catch (Exception ex) {
-//            Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//        
-//        return "";
-//        
-//    }
     
 }

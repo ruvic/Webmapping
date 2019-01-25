@@ -20,10 +20,10 @@ attr.forEach(obj => {
     attributsList.push(attrs);
 });
 
-window.onload = function () {
-    var x = document.getElementsByClassName("ol-has-tooltip");
-    x[x.length - 1].click();
-}
+//window.onload = function () {
+//    var x = document.getElementsByClassName("ol-has-tooltip");
+//    x[x.length - 1].click();
+//}
 
 var zoomToExtentControl = new ol.control.ZoomToExtent({
     extent: [
@@ -80,10 +80,8 @@ layersGroup.forEach((layer, i) => {
     form.appendChild(a1);
     couches_lay.appendChild(form);
     
-    
-    //listLayershtml += html;
 });
-//$("#list-couche").html(listLayershtml);
+
 $("#listCoucheSel").html(listLayersOptions);
 
 var view = new ol.View({
@@ -138,7 +136,6 @@ function updateFilter(type) {
     var cql_filter = {
         'cql_filter': null
     }
-
     if (type == 'reset') {
         map.getLayers().forEach((layer, i) => {
             if (i == layerIndex) {
@@ -146,9 +143,7 @@ function updateFilter(type) {
             }
         });
     } else {
-        
         if ($("#cqlFilter").val()) {
-            
             cql_filter.cql_filter = $("#cqlFilter").val();
             map.getLayers().forEach((layer, i) => {
                 if (i == layerIndex) {
@@ -158,8 +153,6 @@ function updateFilter(type) {
         }
         
     }
-
-
 
 }
 

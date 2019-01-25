@@ -40,7 +40,7 @@
                         </li>
                         <!-- START X-NAVIGATION -->
                         <li class="xn-logo">
-                            <a href="index1.jsp.html">Cameroon's<span class="fa fa-eye"></span></a>
+                            <a href="#">Cameroon's<span class="fa fa-eye"></span></a>
                             <a href="#" class=" x-navigation-control"></a>
                         </li>   
                 
@@ -79,7 +79,7 @@
                                 <div class="panel-heading">
                                     <h3 class="panel-title"><span class="fa fa-cogs"></span> Couches</h3>                                          
                                 </div>
-                                <div class="panel-body">
+                                <div class="panel-body" style="max-height: 520px;overflow-y: scroll;">
                                     <form action="#" role="form" class="form-horizontal" id="list-couche">
                                                                             
                                     </form>
@@ -94,7 +94,7 @@
                                 <h3 class="panel-title">Requêtes</h3>
                             </div>
                             <div class="panel-body">
-                                <form role="form" class="form-group">
+                               
                                     <div class="col-md-6">
 
                                         <!-- LINKED LIST GROUP-->
@@ -150,20 +150,19 @@
                                                                     </div>
                                                                     <div class="col-md-4"></div>
                                                         </div> 
-                                                        <div class="form-group" style="padding-top:30px;">
+                                                        <div class="" style="padding-top:30px;">
                                                                 <label class="col-md-3 control-label">Charger une couche</label>
                                                                 <form id="dataForm" action="/webmapping/map" method="post" enctype="multipart/form-data">
                                                                     <div class="col-md-5">   
 
-                                                                        <input name="file" type="file" class="fileinput btn-primary"  title="Importer" submit/>
+                                                                        <input name="file" type="file" class="fileinput btn-primary"  title="Importer"/>
                                                                         <span class="help-block">Charger un nouveau shapefile</span>
-
 
                                                                     </div>
                                                                     <div class="col-md-4">                                                                                                                                        
-                                                                        <button type="submit" class="btn btn-primary">Charger</button>
+                                                                        <button  class="btn btn-primary">Charger</button>
                                                                     </div>
-                                                                </form>     
+                                                                  
                                                         </div>                       
                                                 </div>
                                             </div>
@@ -190,13 +189,6 @@
 
         <!-- Modal de l'aide -->
 
-        
-
-        <!-- START PRELOADS -->
-        <audio id="audio-alert" src="audio/alert.mp3" preload="auto"></audio>
-        <audio id="audio-fail" src="audio/fail.mp3" preload="auto"></audio>
-        <!-- END PRELOADS -->  
-        
         </div> 
         </body>
     <!-- START SCRIPTS -->

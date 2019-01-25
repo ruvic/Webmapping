@@ -82,9 +82,9 @@ public class Requester {
             conn.connect();
             
             int responseCode = conn.getResponseCode();
-            System.out.println("Sending 'PUT' request to URL : " + url);
-            System.out.println("Put parameters : " + parameters);
-            System.out.println("Response Code : " + responseCode);
+//            System.out.println("Sending 'PUT' request to URL : " + url);
+//            System.out.println("Put parameters : " + parameters);
+//            System.out.println("Response Code : " + responseCode);
             
         } catch (Exception e) {
             e.printStackTrace();            
